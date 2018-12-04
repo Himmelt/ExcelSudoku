@@ -1,4 +1,4 @@
-Attribute VB_Name = "Module1"
+Attribute VB_Name = "Sudoku"
 Sub Plot_Layout()
 Attribute Plot_Layout.VB_Description = "绘制基础数独布局"
 Attribute Plot_Layout.VB_ProcData.VB_Invoke_Func = " \n14"
@@ -76,7 +76,7 @@ Attribute Plot_Layout.VB_ProcData.VB_Invoke_Func = " \n14"
     End With
     
     Range("K2:N5,G7:Q18").Locked = False
-    
+    Range("A1").Locked = False
     Range("A1").Select
     
     ActiveSheet.Protect
@@ -90,10 +90,10 @@ Sub SetMatrix()
 '
 Dim num As Integer
 
-Dim secs(4, 4) As Range
+Dim secs(3, 3) As Range
 Dim section As Range
-Dim row(4) As Integer
-Dim lin(4) As Integer
+Dim row(3) As Integer
+Dim lin(3) As Integer
 
 ActiveSheet.Unprotect
 
@@ -114,6 +114,13 @@ Set secs(3, 1) = Range("J16:L18")
 Set secs(3, 2) = Range("M16:O18")
 Set secs(3, 3) = Range("P16:R18")
 
+    Range("G7:R18").Select
+    With Selection.Interior
+        .Pattern = xlNone
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+    End With
+
     For i = 0 To 3
         For j = 0 To 3
             If Cells(i + 2, j + 11) = "x" Then
@@ -130,7 +137,10 @@ Set secs(3, 3) = Range("P16:R18")
     
     For i = 0 To 3
         If row(i) <> 1 Or lin(i) <> 1 Then
-            MsgBox ("invalid")
+            Range("A1").Select
+            Range("A1").Locked = False
+            ActiveSheet.Protect
+            MsgBox ("无效的异形数独布局 !")
             Exit Sub
         End If
     Next
@@ -142,7 +152,7 @@ Set secs(3, 3) = Range("P16:R18")
         .Pattern = xlSolid
         .PatternColorIndex = xlAutomatic
         .ThemeColor = xlThemeColorDark1
-        .TintAndShade = -4.99893185216834E-02
+        .TintAndShade = -0.149998474074526
         .PatternTintAndShade = 0
     End With
     
@@ -150,3 +160,55 @@ Set secs(3, 3) = Range("P16:R18")
     ActiveSheet.Protect
 End Sub
 
+
+Public Sub RandMatrix()
+    
+Dim l(3) As Integer
+Dim t As Integer
+Dim i As Integer
+
+ActiveSheet.Unprotect
+' Range("K2:N5").ClearContents
+
+Plot_Layout
+
+i = 0
+l(0) = -1
+l(1) = -1
+l(2) = -1
+l(3) = -1
+
+    Do While i <> 4
+        Randomize
+        xxx = Now
+        bbb = Second(xxx)
+        t = Int(Rnd(bbb) * 4)
+        If Not ListContains(t, l) Then
+            l(i) = t
+            i = i + 1
+        End If
+    Loop
+    
+    Range("K2").Offset(0, l(0)) = "x"
+    Range("K3").Offset(0, l(1)) = "x"
+    Range("K4").Offset(0, l(2)) = "x"
+    Range("K5").Offset(0, l(3)) = "x"
+    
+    SetMatrix
+    
+    Range("A1").Select
+    ActiveSheet.Protect
+End Sub
+
+
+Private Function ListContains(num As Integer, arra() As Integer) As Boolean
+   Dim length As Integer
+   length = UBound(arra) - LBound(arra)
+   For i = 0 To length
+        If arra(i) = num Then
+            ListContains = True
+            Exit Function
+        End If
+    Next
+    ListContains = False
+End Function
